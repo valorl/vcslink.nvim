@@ -76,12 +76,34 @@ local detect = function(s)
   end
 end
 
+local function git_toplevel()
+  local res, code = Job:new({
+    command = "git",
+    args = { "rev-parse", "--show-toplevel" },
+  }):sync()
+
+  if code ~= 0 then
+    print("get_remote exit code " .. code)
+    return
+  end
+
+  return res[1]
+end
+
+-- Returns the path of the current buffer, relative to the git repository root
+local function get_buf_git_relative()
+  local buf = vim.api.nvim_buf_get_name(0)
+  local toplevel = git_toplevel() .. "/"
+
+  return string.sub(buf, #toplevel+1)
+end
+
 
 local get_link = function()
   local remote = get_remote()
   local url = parse_remote(remote)
   local branch = get_branch()
-  local path = string.gsub(vim.api.nvim_buf_get_name(0), vim.loop.cwd() .. "/", '')
+  local path = get_buf_git_relative()
   local line,_ = unpack(vim.api.nvim_win_get_cursor(0))
   local platform = detect(url)
   local link = format(platform, url, branch, path, line)
