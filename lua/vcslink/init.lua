@@ -3,7 +3,7 @@ local Job = require("plenary.job")
 local function get_remote()
   local output, code = Job:new({
     command = "git",
-    args = { "config", "--get", "remote.origin.url"  },
+    args = { "config", "--get", "remote.origin.url" },
   }):sync()
 
   if code ~= 0 then
@@ -11,13 +11,13 @@ local function get_remote()
     return
   end
 
-  return table.concat(output,"")
+  return table.concat(output, "")
 end
 
 local function get_branch()
   local output, code = Job:new({
     command = "git",
-    args = { "rev-parse", "--abbrev-ref", "HEAD"  },
+    args = { "rev-parse", "--abbrev-ref", "HEAD" },
   }):sync()
 
   if code ~= 0 then
@@ -25,14 +25,15 @@ local function get_branch()
     return
   end
 
-  return table.concat(output,"")
+  return table.concat(output, "")
 end
 
 function string.starts(s, target)
   return (string.sub(s, 1, #target) == target)
 end
+
 function string.ends(s, target)
-  return (target == "") or (string.sub(s, -#target) == target)
+  return (target == "") or (string.sub(s, - #target) == target)
 end
 
 local function parse_remote(remote)
@@ -51,7 +52,7 @@ local function parse_remote(remote)
   end
 
   if string.ends(remote, ".git") then
-    result = string.sub(result, 1, #result-4)
+    result = string.sub(result, 1, #result - 4)
   end
 
   return result
