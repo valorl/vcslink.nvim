@@ -1,6 +1,6 @@
 local Job = require("plenary.job")
 
-local get_remote = function()
+local function get_remote()
   local output, code = Job:new({
     command = "git",
     args = { "config", "--get", "remote.origin.url"  },
@@ -14,7 +14,7 @@ local get_remote = function()
   return table.concat(output,"")
 end
 
-local get_branch = function()
+local function get_branch()
   local output, code = Job:new({
     command = "git",
     args = { "rev-parse", "--abbrev-ref", "HEAD"  },
@@ -35,7 +35,7 @@ function string.ends(s, target)
   return (target == "") or (string.sub(s, -#target) == target)
 end
 
-local parse_remote = function(remote)
+local function parse_remote(remote)
   local result = ""
 
   if string.starts(remote, "git@") then
@@ -57,7 +57,7 @@ local parse_remote = function(remote)
   return result
 end
 
-local format = function(platform, url, branch, path, line)
+local function format(platform, url, branch, path, line)
   if platform == "github" then
     return string.format("https://%s/blob/%s/%s#L%d", url, branch, path, line)
   end
@@ -67,7 +67,7 @@ local format = function(platform, url, branch, path, line)
   end
 end
 
-local detect = function(s)
+local function detect(s)
   if string.starts(s, "github") then
     return "github"
   end
@@ -99,7 +99,7 @@ local function get_buf_git_relative()
 end
 
 
-local get_link = function()
+local function get_link()
   local remote = get_remote()
   local url = parse_remote(remote)
   local branch = get_branch()
