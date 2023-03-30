@@ -58,16 +58,24 @@ local function parse_remote(remote)
 end
 
 local function format(platform, url, branch, path, line)
+  local vcs_url
+
   if platform == "github" then
-    return string.format("https://%s/blob/%s/%s#L%d", url, branch, path, line)
+    vcs_url = string.format("https://%s/blob/%s/%s", url, branch, path)
   end
 
   if platform == "gitlab" then
-    return string.format("https://%s/-/blob/%s/%s#L%d", url, branch, path, line)
+    vcs_url = string.format("https://%s/-/blob/%s/%s", url, branch, path)
   end
+
+  if line ~= nil then
+    vcs_url = vcs_url .. "#" .. line
+  end
+
+  return vcs_url
 end
 
-local function detect(s)
+local function detect_platform(s)
   if string.starts(s, "github") then
     return "github"
   end
@@ -95,31 +103,32 @@ local function get_buf_git_relative()
   local buf = vim.api.nvim_buf_get_name(0)
   local toplevel = git_toplevel() .. "/"
 
-  return string.sub(buf, #toplevel+1)
+  return string.sub(buf, #toplevel + 1)
 end
 
-
-local function get_link()
+local function get_link(include_line)
   local remote = get_remote()
   local url = parse_remote(remote)
   local branch = get_branch()
   local path = get_buf_git_relative()
-  local line,_ = unpack(vim.api.nvim_win_get_cursor(0))
-  local platform = detect(url)
-  local link = format(platform, url, branch, path, line)
-  return link
+  local platform = detect_platform(url)
+  if include_line then
+    local line, _ = unpack(vim.api.nvim_win_get_cursor(0))
+    return format(platform, url, branch, path, line)
+  end
+  return format(platform, url, branch, path, nil)
 end
 
 local M = {}
 
-M.copy = function()
-  local link = get_link()
+M.copy = function(include_line)
+  local link = get_link(include_line)
   print("Copied " .. link)
   vim.fn.setreg("+", link, '"')
 end
 
-M.browse = function()
-  local link = get_link()
+M.browse = function(include_line)
+  local link = get_link(include_line)
 
   Job:new({
     command = "xdg-open",
@@ -128,4 +137,3 @@ M.browse = function()
 end
 
 return M
-
