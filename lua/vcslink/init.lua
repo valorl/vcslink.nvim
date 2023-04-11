@@ -70,7 +70,7 @@ local function format(platform, url, branch, path, line)
   end
 
   if line ~= nil then
-    vcs_url = vcs_url .. "#" .. line
+    vcs_url = vcs_url .. "#L" .. line
   end
 
   return vcs_url
